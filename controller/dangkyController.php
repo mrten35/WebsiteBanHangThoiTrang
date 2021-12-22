@@ -65,7 +65,26 @@ function getUserByEmail($email){
     }
 }
 
-
+function getUserByAcount($tendangnhap){
+    $servername = "localhost:4306";
+    $username = "root";
+    $password = "";
+    $dbname="thweb";
+    
+    try {
+        $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+        // set the PDO error mode to exception
+        $stmt = $conn->prepare("SELECT tendangnhap FROM  user where tendangnhap=:tendangnhap");
+        $stmt->bindParam(':tendangnhap', $tendangnhap);
+        $stmt->execute();
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $user;
+    } catch(PDOException $e) {
+        echo "Đăng ký thất bại" . $e->getMessage();
+      }finally{
+        $conn = null;
+    }
+}
 
 if (count($_POST) > 0) {
     $txt_name=$_POST["txt_name"];
@@ -84,8 +103,15 @@ if (count($_POST) > 0) {
         die();
        
     }
-    
-    else{
+    $user=getUserByAcount($txt_account);
+    if(isset($user['tendangnhap'])) {
+        echo'<script>
+        window.alert("Tên đăng nhập đã tồn tại! Đăng ký thất bại");
+        window.history.back();
+        </script>';
+        die();
+       
+    }else{
         $user=new User($txt_name,$txt_email,$txt_account,$txt_password,$txt_phone,$rdg_sex);
         insertUser($user);
     }
